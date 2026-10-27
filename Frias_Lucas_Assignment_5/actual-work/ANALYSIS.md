@@ -1624,9 +1624,133 @@ Not only are the diffs fairly small, several of them are just changing extra cha
 
 # Correctness - Changes
 
-Correctness is how stricly they followed the instructions. Flash was able to succeed in this, but Astra was not. 
+Correctness is how stricly they followed the instructions. Flash and Astra did this pretty well, it was hard to mess up. However, I think I'll take more point off of Flash 
 
-Specifically, I specified that 
+Specifically, I specified that the file output should be within the file:
+
+```
+Write the solutions for each puzzle file to a file named solutionN.txt (N being the puzzle number)
+```
+
+And while Flash did output this correctly:
+
+```
+(solution3.txt)
+7 8 5 3 2 6 1 4 9 
+3 4 2 5 1 9 6 7 8 
+6 1 9 8 4 7 5 2 3 
+4 9 3 6 8 5 2 1 7 
+1 2 8 9 7 4 3 6 5 
+5 7 6 1 3 2 8 9 4 
+2 5 1 4 9 3 7 8 6 
+9 3 7 2 6 8 4 5 1 
+8 6 4 7 5 1 9 3 2 
+
+Solutions found: 1
+```
+it also did normal stdout output like it did previously. It just also so happens that it piped the output out.
+
+Astra did the same output
+
+```
+(solution3.txt)
+Solution 1:
+7 8 5 3 2 6 1 4 9 
+3 4 2 5 1 9 6 7 8 
+6 1 9 8 4 7 5 2 3 
+4 9 3 6 8 5 2 1 7 
+1 2 8 9 7 4 3 6 5 
+5 7 6 1 3 2 8 9 4 
+2 5 1 4 9 3 7 8 6 
+9 3 7 2 6 8 4 5 1 
+8 6 4 7 5 1 9 3 2 
+
+Solutions found: 1
+```
+
+But has different stdout output, that just hints at what the solution is.
+
+```
+File: puzzle1.txt Solutions found: 1. See solution1.txt 
+File: puzzle2.txt Solutions found: 1. See solution2.txt 
+File: puzzle3.txt Solutions found: 1. See solution3.txt 
+File: puzzle4.txt No solution found. See solution4.txt 
+File: puzzle5.txt Solutions found: 2. See solution5.txt 
+```
+
+So I will give Astra a better score because it actually writes to just the file and not the screen. Though, functionally, I didn't say not to print it, so both get full marks on there.
 
 ## Time Complexity
+
+Both of these programs are not changed in time and space complexity by either LLM. Their core functionality remains untouched-- they implement the same algorithm, just writing output to a file. Therefore, this section remains. All instructions to write are linear and do not scale with input more than the display already does:
+```
+//google flash's SudokuSolver, line 215
+           if (count == 0)
+            {
+                outfile << "No solution found\n";
+            }
+            else
+            {
+                outfile << "Solutions found: " << count << "\n";
+            }
+            outfile.close(); // Close solution file stream
+        }
+
+```
+for example, is scaled with the display output.
+
+## Space Complexity
+
+Space complexity also does not change. SPace complexity is the amount the program changes within its space requrements while executing, and the program does not require extra space. In fact, we do not store the buffer that we even write to, as it is all handled by the operating system when we write and displa output. Therefore, we have no space complexity changes within our program, and the same criticisms as before remained just as valid.
+
+## Maintainability
+
+Both Flash and Astra use ofstream to write to our file
+```cpp
+//openai, line 197
+std::ofstream solutionFile(solutionFilename);
+```
+
+```cpp
+//google, line 152
+std::ofstream outfile(solFilename); // Open the solution output file
+```
+These two are alright, and the standard way. Instead of then just displaying the output, they write by using streams to the file instead of the display. We pass the ofstream by reference in Flash
+```cpp
+int findSolutions(std::ostream &stream = std::cout)
+```
+and also the same in Astra
+
+```cpp
+//line 115, openai
+    int findSolutions(std::ostream &output)  // Find and write all solutions
+```
+
+and we just replace every instead where we would write to cout with output. That's it, there's no extra frills. In terms of maintainability, it is hard to critique anything, because there is no real changes. It avoids namespace colliding, it handles memory safely through reference instead of making a new ofstream object each time, and it is simple. This is nothing but an A in my book, and I cannot suggest any possible changes to make this better.
+
+# Human Improvement and Selection
+
+I chose OpenAI's improvement of Mr Garcia's, because it followed my prompt a bit more closely in not display the answers to stdout. Therefore, I improved the openai.cpp version:
+
+
+```
+
+
+```
+
+
+What I changed was pretty minimal, and I used Claude to automate these changes on the code (because I didn't want to fix every part by hand)
+    * Make sure every iterator is prefix iterated
+    * do not use inline if statements unless it's break or continue, and make sure that those also are in one line, not two with a tab and enter
+    * make givensAreValid have a less vague name
+    * clean up readsucess to break and err immediately if the file is malformated
+
+This is the result:
+
+
+
+
+
+
+
 
