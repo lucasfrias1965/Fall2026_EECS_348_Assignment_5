@@ -55,6 +55,7 @@ private:                                 // Make it private instead of public
     }
 
     // Function authored by Andy Garcia to detect if a digit is repeated on a row or column. Error detected by Claude and given assistance with logic and code implemented by Andy Garcia
+
     bool givensAreValid()
     {                               // new function to test if duplicate nums exist on the same row or col
         for (int r = 0; r < 9; ++r) // loop through every row

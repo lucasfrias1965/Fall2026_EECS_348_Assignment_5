@@ -364,6 +364,8 @@ The program compiles fine, and has correct output, but some malformed input file
 
 # Time Complexity
 
+This will be rehashing the theoretical more precisely, and then reviewing the actual time complexity as a relationship of the theoretical.
+
 ## Theoretical
 
 I will rehash the same statement I made previously regarding time complexity within Assignment 4:
@@ -399,8 +401,387 @@ O(M) = 9^(81-M)
 
 with an inverse relationship... the smaller the M, the larger the time complexity.
 
-Despite our recursion, the algorithm of depth first never chceks whether or not we've already pursued a certain path. THis maens that given we have N=3 and M=7
+### Inherent Problem With Depth First Search
 
-| _  _  1  
-| 2  
-|
+Despite our recursion, the algorithm of depth first never checks whether or not we've already pursued a certain path. THis maens that given we have N=3 and M=6
+
+| _  2   _ |
+| 2  1  3 |
+| _  3  1 |
+
+Let's say we set A[0]0] to be 1. If we continue with operations, such as A[2][0] = 3, A[0][2] = 2, we found a consistent solution. However, when verifying other solutions, any path can be taken. Our next iteration, where we check A[2][0] and set it to three, ends up resulting in the same non-trivial solution, just with different steps. It is such that we would repeat solutions. In fact, for the number of empty squares, if a solution exists, there is M! ways to repreat this solution. This makes the time complexity very bad, because we do not eliminate duplicates and calculate them, only discarding them when we know they're the same.
+
+## Actual 
+
+I made my own Python script to manage to measure the real time complexity. I handwrote this, and I leave it here for prosperity:
+
+```python3
+from random import sample
+import os, datetime, re, subprocess, time
+
+
+SOLVABLE_BOARD = """\
+5 3 9 8 2 4 1 7 6
+1 8 6 5 7 9 2 4 3
+4 7 2 1 3 6 8 9 5
+9 2 4 3 8 7 5 6 1
+3 1 8 6 9 5 4 2 7
+6 5 7 4 1 2 3 8 9
+7 4 5 2 6 1 9 3 8
+8 9 1 7 4 3 6 5 2
+2 6 3 9 5 8 7 1 4
+"""
+
+#splits thie input into how i need it
+solv_board_formatted = re.split(r'[ \n\s]+', SOLVABLE_BOARD)[:-1]
+print(solv_board_formatted)
+input()
+
+for i in range(0, 82):
+    #build string and write it to file
+    f = open("puzzle5.txt", "w")
+    solv_board_formatted = re.split(r'[ \n\s]+', SOLVABLE_BOARD)[:-1]
+
+    start = time.perf_counter()
+
+
+# Source - https://stackoverflow.com/a/5597017
+# Posted by user355252, modified by community. See post 'Timeline' for change history
+# Retrieved 2026-10-24, License - CC BY-SA 3.0
+
+    with open(os.devnull, 'wb') as devnull:
+        subprocess.check_call(['./a.out'], stdout=devnull, stderr=subprocess.STDOUT)
+
+
+    for rs in sample(range(81), i):
+        solv_board_formatted[rs] = "_"
+    f.write("".join(solv_board_formatted))
+
+    #get the time when it started and subtracts by the current time
+
+    elapsed = time.perf_counter() - start
+
+    print(f"diff is {elapsed}")
+    open("results.txt", "a").write(f"M = {i} -> {elapsed}\n")
+```
+
+The output of my program
+```
+diff is 0.00545185903320089
+diff is 0.0026373660075478256
+diff is 0.0021666059619747102
+diff is 0.002530121011659503
+diff is 0.0021756510250270367
+diff is 0.002137768955435604
+diff is 0.002133769972715527
+diff is 0.0021438749972730875
+diff is 0.0020939590176567435
+diff is 0.0025313780060969293
+diff is 0.002387487969826907
+diff is 0.002253651968203485
+diff is 0.0022582660312764347
+diff is 0.002199187991209328
+diff is 0.002441753982566297
+diff is 0.0021356380311772227
+diff is 0.0024444410228170455
+diff is 0.0021521500311791897
+diff is 0.002081955026369542
+diff is 0.0022210879833437502
+diff is 0.002054744982160628
+diff is 0.0020828780252486467
+diff is 0.0027890809578821063
+diff is 0.002232139988336712
+diff is 0.0022941739880479872
+diff is 0.0022375709959305823
+diff is 0.002240996982436627
+diff is 0.002228586992714554
+diff is 0.0022679029498249292
+diff is 0.0022391750244423747
+diff is 0.0022088270052336156
+diff is 0.002066651009954512
+diff is 0.0020616299589164555
+diff is 0.0020836680196225643
+diff is 0.0020722190383821726
+diff is 0.0021858169930055737
+diff is 0.0024438260006718338
+diff is 0.0022411009995266795
+diff is 0.0022055069566704333
+diff is 0.0021622059866786003
+diff is 0.0021802809787914157
+diff is 0.0023885220289230347
+diff is 0.0023798600304871798
+diff is 0.0023473030305467546
+diff is 0.004238600027747452
+diff is 0.0025159650249406695
+diff is 0.0037813110393472016
+diff is 0.0025767749757505953
+diff is 0.005185690009966493
+diff is 0.002763491007499397
+diff is 0.003756350022740662
+diff is 0.01092040300136432
+diff is 0.008366678026504815
+diff is 0.002676305011846125
+diff is 0.013574207026977092
+diff is 0.24760583002353087
+diff is 0.3609359919792041
+diff is 1.0877921709907241
+diff is 5.160632780985907
+diff is 1.631053916993551
+diff is 1.5057089289766736
+diff is 11.115237519028597
+diff is 9.016612896986771
+diff is 13.992875210999046
+diff is 715.2867007290479
+```
+
+Shows the same expected blow-up. The reason that we have a slightly slower bleed here is there's optimizations being done at the assembly level that give us a boost of speed, even if our algorithm is terrible inefficient. Like most patches in life, it's not enough, and we soon laspe into unreasable solving times for our target N=9.
+
+# Space
+
+## Theoretical
+
+The theoretical space complexity **should** be O(1), but it's a little more nuanced than that. 
+
+It is true that, given our calculation of the solution, all we need to do is recurse downwards with a pass by value. Because of this, we accept a closed input size (N=9, 9x9=81 elements), we preform our validation operation, and then we finish.
+
+However, there are varying ways to achieve this. There was a seperate issue last time, where Opus used significantly more memory than Flash for large M. The reason for this is because Claude stored multiple copies of the solution in a vector that it would pass downwards by value, while Flash would store one global vector by reference passed and allow the recursion to add solutions once found. This is just a practical imperfection, the space complexity should be constant as our input cannot change size and we do not need to store multiple board states because of our setup.
+
+Technically, though, there is a scaling factor on the inputs that we store, especially for large unsolved Sudoku puzzles where there are many solutions. Therefore, since the input scales the space, there is technically a space complexity that is dependent on M. In fact, it tends to grow very quickly, the same as our time complexity. However, it is small and bounded for reasonable and nice M. The worst case scenarion is when M= NxN, or we have a completely empty board. The upper bound is the sizeof each board in memory.
+
+From this paper here:
+https://www.apprendre-en-ligne.net/blog/docu/sudoku.pdf
+
+- There are N0 = 6670903752021072936960 ≈ 6.671 × 1021 valid Sudoku grids. Taking out the factors of 9! and 722 coming from relabelling and the lexicographical reduction of the top row of blocks B2 and B3, and of the left column of blocks B4 and B7, this leaves 3546146300288 = 27 × 27704267971 arrangements, the last factor being prime
+
+This is our upper bound, and we can know for a fact that our program would take our base memory + board_size * 6.671 x 1021, meaning we could absolutely store all possible answers. If our board is 100 bytes (which is a generous overestimate), we will get approximately:
+
+>>> 100 * 6.671 * 1021 = 681109 bytes ~= 682 kb
+
+This is defintely storable.
+
+Thus, we have a large but finite, though temporally impratical amount of solutions. And, for increasingly smaller M, we will have much less solutions than checks to store. The relationship of this is highly probalistic, and you are welcome to read the paper cited above that discusses calculating possible permutations on more realistic bounds. I will claim that the space complexity is O(M)= e^M for large M, but for small and realistic M is more closely O(M) = 1.
+
+## Actual
+
+I had Opus 5.5 generate this script to verify the space complexity of Mr. Garcia's initial program to verify it stays around constant.
+
+
+```python3
+from random import sample
+import os, re
+
+SOLVABLE_BOARD = """\
+5 3 9 8 2 4 1 7 6
+1 8 6 5 7 9 2 4 3
+4 7 2 1 3 6 8 9 5
+9 2 4 3 8 7 5 6 1
+3 1 8 6 9 5 4 2 7
+6 5 7 4 1 2 3 8 9
+7 4 5 2 6 1 9 3 8
+8 9 1 7 4 3 6 5 2
+2 6 3 9 5 8 7 1 4
+"""
+
+RESULTS_FILE = "space_results.txt"
+
+# truncate/create the results file fresh for this run
+open(RESULTS_FILE, "w").close()
+
+for i in range(0, 82):
+    # start from a fresh copy of the solved board each iteration
+    board = re.split(r'[ \n\s]+', SOLVABLE_BOARD)[:-1]
+    for rs in sample(range(81), i):
+        board[rs] = "_"
+
+    with open("puzzle5.txt", "w") as f:
+        f.write("".join(board))
+
+    with open(os.devnull, "wb") as devnull:
+        # Launch the solver ourselves (instead of subprocess.check_call) so we
+        # can reap it with os.wait4 and read its peak RSS straight from the
+        # kernel's rusage struct for *this* child only.
+        pid = os.fork()
+        if pid == 0:
+            os.dup2(devnull.fileno(), 1)  # stdout
+            os.dup2(devnull.fileno(), 2)  # stderr
+            os.execv("./a.out", ["./a.out"])
+            os._exit(127)  # only reached if execv fails
+
+        _, status, rusage = os.wait4(pid, 0)
+
+    if os.WIFEXITED(status) and os.WEXITSTATUS(status) != 0:
+        print(f"WARNING: a.out exited with status {os.WEXITSTATUS(status)} at M={i}")
+
+    # ru_maxrss is in kilobytes on Linux
+    max_rss_kb = rusage.ru_maxrss
+
+    print(f"M = {i} -> {max_rss_kb} KB")
+    with open(RESULTS_FILE, "a") as rf:
+        rf.write(f"M = {i} -> {max_rss_kb} KB\n")
+
+```
+
+Which yielded this output:
+
+```
+M = 0 -> 7900 KB M = 1 -> 7904 KB M = 2 -> 7904 KB M = 3 -> 7904 KB M = 4 -> 7904 KB M = 5 -> 7904 KB M = 6 -> 7904 KB M = 7 -> 7904 KB M = 8 -> 7904 KB M = 9 -> 7904 KB M = 10 -> 7908 KB M = 11 -> 7908 KB M = 12 -> 7908 KB M = 13 -> 7908 KB M = 14 -> 7908 KB M = 15 -> 7908 KB M = 16 -> 7908 KB M = 17 -> 7908 KB M = 18 -> 7908 KB M = 19 -> 7908 KB M = 20 -> 7908 KB M = 21 -> 7908 KB M = 22 -> 7908 KB M = 23 -> 7908 KB M = 24 -> 7908 KB M = 25 -> 7908 KB M = 26 -> 7908 KB M = 27 -> 7912 KB M = 28 -> 7912 KB M = 29 -> 7912 KB M = 30 -> 7912 KB 
+```
+
+Technically, this doesn't scale linearly. The reason is that more and more memory is used to store longer and longer answers. Wonce we pass the 58 range, the program runs so slowly that I can't verify the memory stays more or less constant. The theoretical thus tracks fairly closely to the actual time complexity outputted, which slowly increases, like an exponential with a a very widening coefficient.
+
+# Maintainability
+
+Before all else, I will say that Mr. Garcia took the commenting every lines recommendation to heart, so much so that it is actually difficult to read the code. However, the comments are very instructful, so I do appreciate it
+
+This program outputted is similar to the previous Flash, which means it inherents a lot of its flaws.
+
+## Suffix/Prefix and givensAreValid
+
+As you may remember last time, there was a discussion about how rigid LLM code generated can be. Specifically, we talked about how LLMs tend to do the ridiculous prefix incrementation:
+
+
+```cpp
+    //bool isValid in sudoku solver
+        { // Loop through all 3 rows of the subgrid
+            for (int c = 0; c < 3; ++c)
+```
+
+and would specifically attempt to do prefix incrementation on a for loop where no human would. 
+
+Here's another Gemini generated code that does the same thing.
+
+```cpp
+        if (row == 9)
+        {                                                       // Check if we have successfully processed past the last row
+            ++solutionCount;                                    // count it
+``` 
+
+Doing this incrementation with a prefix is a dead giveaway that an LLM is generating the code. I did an informal test within my Software Engineering lab, and every person who made a for loop did suffix incrementation.
+
+There is one function that is very confusing to me for that reason.
+
+```cpp
+// Function authored by Andy Garcia to detect if a digit is repeated on a row or column. Error detected by Claude and given assistance with logic and code implemented by Andy Garcia
+
+bool givensAreValid()
+    {                               // new function to test if duplicate nums exist on the same row or col
+        for (int r = 0; r < 9; ++r) // loop through every row
+            for (int c = 0; c < 9; ++c)
+            {                        // loop through every col
+                int d = board[r][c]; // set d equal to the digit at the board spot looked at
+                if (d == 0)
+                    continue;               // skip blanks
+                board[r][c] = 0;            // take it off the board
+                bool ok = isValid(r, c, d); // does it conflict with the rest?
+                board[r][c] = d;            // put it back
+                if (!ok)
+                    return false; // two givens clash
+            }
+        return true; // otherwise return true
+    }
+```
+
+As you can see on the top, Mr. Garcia says he authored this function. However, the same suffix incrementation is used within the for loop. More than that, we use concise and strange names such as d, c, and r. These are actually the same names that my Flash generated when making this exact function. Lastly, it uses inline if statements that with a tab and enter, something else that Flash is very keen to do as seen here:
+
+```cpp
+            if (board[row][i] == num)
+                return false; // Return false if the number is already in the row
+``` 
+
+So while authored by Mr. Garcia, it seems that it is more LLM generated in at least its syntax and production, giving it the same bad maintainability quirks.
+
+## Unnecessary Complexity
+
+As Tim Peters once said when you run import this in any Python shell.
+
+- Simple is better than complicated. Complicated is better than complex
+
+This is the frame that I felt reviewing some of the changes given that are supposed to patch up the program, but add unnecessary complexity. For example, within main, while reading the file, when we encounter an invalid character/too small input, we set a boolean readSuccess = false and then break. This happens twice, for each case I mentioned respectively.
+
+```cpp
+                if (!(infile >> ch))
+                {                        // Try to read the file from the file stream
+                    readSuccess = false; // Indicate the read was a failure if unsucssesful
+                    break;               // Break out of the column loop
+                }
+ 
+```
+
+```cpp
+else
+                {                        // Handle unexpected characters in the file
+                    readSuccess = false; // CODE CHANGE #1 : This detects a bad character and will indicate that to readSuccess (Idea presented by Claude, code written and commented by Andy Garcia)
+                    break;               // leaves the column loop
+                }
+```
+
+Then we check if readSuccess is false:
+
+```cpp
+        //this is within our loop
+            if (!readSuccess)
+                break; // Break outer loop if reading failed
+        }
+```
+
+and then, once we break out of the loop, wil  call a specific error function:
+```cpp
+        if (!readSuccess)
+        {                                                                   // Check if puzzle was formatted correctly
+            std::cout << "Error: Invalid puzzle in " << filename << "\n\n"; //  will now print an error message when a file is not correct. (Andy Garcia)
+            return;                                                         // returns to move on to next file after detecting bad one. (Andy Garcia)
+        }
+```
+
+But why not just print something and exit? The function and error is not unique, and the same thing could be achieved with 
+```
+if (!(inline >> ch)){std::cout << "Error reading file"; exit(1);}
+```
+
+Having a seperate boolean, keeping track of the value, and then erroring and exiting out seems very very redundant. I think Claude working on this attempts to emulate what it would do for large projects, and implements solutions that don't really make sense for small projects.
+
+
+## Namespace Cramping and Overcaution
+
+This is a positive for LLMs on Maintainability, but still work talking about why.
+
+C++, compared to C, has a massive standard library. There are a lot of builtin types that the std library has. For small projects, you can see
+
+```cpp
+using namespace std;
+```
+
+which allows me to export all types without hierarchy. For example, instead of std::vector, using vector as a namespace. 
+
+The issue comes in namespace collision. Because C++ projects are massive, span multiple codebases, and because how C compilies things literally with inclusions (something that C++ somewhat inherents), package managing in C++ is one of the worst experiences known to man. Any redefinition of a namespace in another file will just create an error at best, and at worst an implicit redefinition of what that namespace means. It also becomes very difficult to debug at a high level, when you have millions of C++ files.
+
+Moreover, C++ std names can be generic enough that they could be implemented by libraries before C++ did it themselves. Most companies transition to the next version of C++ very slowly, partly for this reason (most companies currently run C++11 or, if they're feeling risky, C++17). This can cause so much unintended problems that it is much better to use std:: explicitly, even if it is verbose. 
+
+In such a small project like this, it is really clear that there would be no namespace collision, because there isn't even a second file. But what if that changed? Maintainability wise, we're always looking for the best future proof solution. I think that Flash did a good job at future proofing, even if here it's a little explicit.
+
+# Prompt and LLMs
+
+As per the rubric, I will be selecting two LLMs to make the minor changes decribed in the rubric. 
+
+
+The changes, which I keep here as the prompt I used, are as follows:
+
+```
+
+Modify the following C++ program attached with these features/changes:
+
+
+Write the solutions for each puzzle file to a file named solutionN.txt (N being the puzzle number)
+
+    * If there's no solutions, display "No solution found"
+    * If solutions are found, it should **all** solutions followed by a single line "Solutions found: N" where N is the number of solutions
+    * These should be in the same format as the puzzle1.txt file I've attached
+
+```
+
+Attached to my prompt was Mr. Garcia's unmodifed Assignment4.cpp, and then puzzle1.txt.
+
+I firstly used Flash, because I was curious how it would modify its own code. This is Flash 
+
+
+
