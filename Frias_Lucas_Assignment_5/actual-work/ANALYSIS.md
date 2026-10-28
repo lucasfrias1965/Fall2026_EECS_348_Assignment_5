@@ -1,3 +1,5 @@
+# Fall EECS 348 Assignment 5
+
 Happy Halloween, Mr. Zhe. I hope you're doing good.
 
 Last time, we did our most complex analysis yet into a brute force depth first Sudoku algorithm. I was very impressed with Gemini Flash's output, but I suspected that the output was from the wealth of game-related examples Alphabet Inc has, because of its great amount of focus in games such as Chess and Go (the game, not the language, but they created that too).
@@ -328,6 +330,7 @@ _ 2 4 _ _ 7 _ 1 _
 8 3 6 _ 9 _ 4 _ _  
 _ 7 _ 2 3 5 _ _ _  
 No solution found 
+```
 
 The buffer doesn't check for any extra characters, meaning any misinput is misinterperted from what it actually is meant to be. Therefore, this program is not entirely correct because it cannot handle all malformed input.
 
@@ -415,7 +418,7 @@ Let's say we set A[0]0] to be 1. If we continue with operations, such as A[2][0]
 
 I made my own Python script to manage to measure the real time complexity. I handwrote this, and I leave it here for prosperity:
 
-```python3
+```python
 from random import sample
 import os, datetime, re, subprocess, time
 
@@ -563,10 +566,9 @@ Thus, we have a large but finite, though temporally impratical amount of solutio
 
 ## Actual
 
-I had Opus 5.5 generate this script to verify the space complexity of Mr. Garcia's initial program to verify it stays around constant.
+I had Opus 5.5 generate this script to verify the space complexity of Mr. Garcia's initial program to verify it stays around constant. It's based on my program that I made myself, that I then gave to AI.
 
-
-```python3
+```python
 from random import sample
 import os, re
 
